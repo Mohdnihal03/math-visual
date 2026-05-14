@@ -14,7 +14,7 @@ export default function Navbar() {
         {/* Logo mark — glowing geometric diamond */}
         <img src="/ganith-samaaj.png" alt="Logo" className="w-12 h-12 object-contain" />
         <span className="font-display font-bold text-xl tracking-tight text-ink">
-          Ganith<span style={{ color: '#00e0c6' }}>Samaaj</span>
+          Ganith <span style={{ color: '#00e0c6' }}>Society</span>
         </span>
       </Link>
 

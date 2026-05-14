@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { topics } from '../topics/index'
 import ReactMarkdown from 'react-markdown'
@@ -79,9 +79,40 @@ export default function Home() {
   const [searchResult, setSearchResult] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [localResults, setLocalResults] = useState([])
+  const inputRef = useRef(null)
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+  useEffect(() => {
+    if (isSearchOpen && inputRef.current) {
+      setTimeout(() => inputRef.current.focus(), 100) // Small timeout to ensure modal is rendered
+    }
+  }, [isSearchOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setLocalResults([])
+      return
+    }
+    const filtered = topics.filter(t => 
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    setLocalResults(filtered)
+  }, [searchQuery])
+
+  const handleSearch = async (query = searchQuery) => {
+    const term = query.trim()
+    if (!term) return
     setIsLoading(true)
     setError(null)
     setSearchResult('')
@@ -93,7 +124,7 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          query: searchQuery,
+          query: term,
           freshness: "noLimit",
           summary: false,
           count: 5
@@ -114,7 +145,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    document.title = "GanithSamaaj — Interactive 3D Math Visualizations"
+    document.title = "Ganith Society — Interactive 3D Math Visualizations"
 
     let metaDesc = document.querySelector('meta[name="description"]')
     if (!metaDesc) {
@@ -206,10 +237,10 @@ export default function Home() {
           </p>
 
           {/* Action Buttons */}
-          <div className="anim-fade-up flex justify-center gap-4 mb-10" style={{ animationDelay: '200ms' }}>
+          <div className="anim-fade-up flex flex-col sm:flex-row justify-center items-center gap-4 mb-10 max-w-sm mx-auto sm:max-w-none" style={{ animationDelay: '200ms' }}>
             <Link
               to="/cheat-sheet"
-              className="px-6 py-3 rounded-full text-sm font-display font-bold transition-all duration-300 hover:scale-105"
+              className="px-6 py-3 rounded-full text-sm font-display font-bold transition-all duration-300 hover:scale-105 w-full sm:w-auto text-center flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, #00e0c6 0%, #a78bfa 100%)',
                 color: '#08090d',
@@ -220,7 +251,7 @@ export default function Home() {
             </Link>
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="px-6 py-3 rounded-full text-sm font-display font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              className="px-6 py-3 rounded-full text-sm font-display font-bold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
               style={{
                 background: 'rgba(18, 20, 28, 0.8)',
                 color: '#00e0c6',
@@ -248,6 +279,12 @@ export default function Home() {
                 <span>{f.label}</span>
               </span>
             ))}
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="mt-8 text-[10px] font-display font-bold uppercase tracking-[0.2em] flex flex-col items-center gap-2 animate-pulse" style={{ color: '#4a4d5e' }}>
+            <span>scroll down or select topic from below</span>
+            <span style={{ color: '#00e0c6', fontSize: '14px' }}>↓</span>
           </div>
         </div>
 
@@ -468,15 +505,17 @@ export default function Home() {
       {/* Search Modal */}
       {isSearchOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
-          style={{ background: 'rgba(12, 13, 20, 0.95)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 backdrop-blur-sm"
+          style={{ background: 'rgba(8, 9, 13, 0.7)' }}
           onClick={() => setIsSearchOpen(false)}
         >
           <div 
-            className="w-full max-w-3xl bg-void-50 border border-void-200 rounded-2xl p-4 md:p-6 shadow-2xl max-h-[90vh] overflow-y-auto anim-fade-up"
+            className="w-full max-w-3xl bg-void-50 border rounded-2xl p-4 md:p-6 shadow-2xl max-h-[90vh] overflow-y-auto anim-fade-up"
             style={{
-              background: '#12141c',
-              border: '1px solid rgba(255,255,255,0.05)',
+              background: 'rgba(18, 20, 28, 0.75)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
               animationDuration: '0.3s',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -496,18 +535,29 @@ export default function Home() {
 
             {/* Input */}
             <div className="relative mb-4 md:mb-6">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">🔍</span>
               <input 
+                ref={inputRef}
                 type="text"
-                placeholder="Ask anything about Class 9 Math..."
-                className="w-full bg-void border border-void-200 rounded-xl px-4 py-3 text-ink font-body focus:outline-none focus:border-neon-teal transition-colors text-sm md:text-base"
+                placeholder="Ask anything about Math"
+                className="w-full bg-void border border-void-200 rounded-xl pl-11 pr-24 py-3 text-ink font-body focus:outline-none focus:border-neon-teal transition-colors text-sm md:text-base"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
                   borderColor: 'rgba(255,255,255,0.05)',
+                  boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.3)',
                 }}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-20 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink transition-colors"
+                >
+                  ✕
+                </button>
+              )}
               <button 
                 onClick={handleSearch}
                 className="absolute right-2 top-1/2 -translate-y-1/2 px-3 md:px-4 py-1 md:py-1.5 rounded-lg bg-neon-teal text-void font-display font-bold text-xs"
@@ -521,10 +571,53 @@ export default function Home() {
             </div>
 
             {/* Results */}
-            <div className="results-area">
+            <div className="results-area mt-4">
+              {/* Local Results */}
+              {localResults.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-xs font-display font-bold uppercase tracking-wider text-neon-teal mb-3">
+                    Interactive Models
+                  </h3>
+                  <div className="space-y-3">
+                    {localResults.map((topic) => (
+                      <Link
+                        key={topic.id}
+                        to={`/topic/${topic.id}`}
+                        onClick={() => setIsSearchOpen(false)}
+                        className="p-3 rounded-xl bg-void border border-neon-teal/20 hover:border-neon-teal/50 hover:shadow-[0_0_15px_rgba(0,224,198,0.1)] transition-all duration-300 flex items-center justify-between"
+                        style={{ background: 'rgba(0, 224, 198, 0.02)' }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{topic.icon}</span>
+                          <div>
+                            <h4 className="text-sm font-display font-bold text-ink">{topic.title}</h4>
+                            <p className="text-xs text-ink-muted">{topic.description}</p>
+                          </div>
+                        </div>
+                        <span className="text-neon-teal text-xs font-display font-bold">Explore →</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Web Results Header */}
+              {(isLoading || (Array.isArray(searchResult) && searchResult.length > 0)) && (
+                <h3 className="text-xs font-display font-bold uppercase tracking-wider text-ink-muted mb-3">
+                  Web Results
+                </h3>
+              )}
+
+              {/* Web Results Content */}
               {isLoading ? (
-                <div className="flex items-center justify-center py-10">
-                  <span className="glow-pulse" style={{ color: '#00e0c6' }}>Thinking...</span>
+                <div className="space-y-4 py-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 rounded-xl bg-void border border-white/5 animate-pulse">
+                      <div className="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-white/5 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-white/5 rounded w-full"></div>
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
                 <p className="text-red-500 text-sm font-body">{error}</p>
@@ -533,7 +626,7 @@ export default function Home() {
                   {searchResult.map((res, idx) => (
                     <div 
                       key={res.id || idx}
-                      className="p-3 md:p-4 rounded-xl bg-void border border-void-200 hover:border-neon-teal transition-colors anim-fade-up"
+                      className="p-3 md:p-4 rounded-xl bg-void border border-void-200 hover:border-neon-teal/50 hover:shadow-[0_0_15px_rgba(0,224,198,0.1)] transition-all duration-300 anim-fade-up"
                       style={{
                         background: 'rgba(255,255,255,0.02)',
                         borderColor: 'rgba(255,255,255,0.05)',
@@ -560,11 +653,27 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-ink-muted text-sm font-body text-center py-10">
-                  Ask a question to get started. Example: "Explain Area of cone"
-                </p>
-              )}
+              ) : localResults.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-ink-muted text-sm font-body mb-4">
+                    Ask a question to get started, or try one of these:
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['Area of Cone', 'Pythagoras Theorem', 'Volume of Cylinder', 'Trigonometry Basics'].map((chip) => (
+                      <button
+                        key={chip}
+                        onClick={() => {
+                          setSearchQuery(chip)
+                          handleSearch(chip)
+                        }}
+                        className="px-3 py-1.5 rounded-full text-xs font-body font-medium bg-void border border-white/5 text-ink-muted hover:text-neon-teal hover:border-neon-teal/20 hover:bg-neon-teal/5 transition-colors"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

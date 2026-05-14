@@ -106,7 +106,7 @@ export default function Landing() {
   const [isFadingOut, setIsFadingOut] = useState(false)
 
   useEffect(() => {
-    document.title = "Ganeeth Samaaj — Welcome"
+    document.title = "Ganith Society — Welcome"
   }, [])
 
   const [num1, setNum1] = useState(0)
@@ -255,7 +255,7 @@ export default function Landing() {
 
           {/* Title */}
           <h1 className="anim-fade-up font-display font-extrabold text-4xl md:text-7xl mb-4 leading-none tracking-tight text-ink">
-            Ganeeth SamaaJ
+            Ganith Society
           </h1>
 
           {/* Subtitles */}
