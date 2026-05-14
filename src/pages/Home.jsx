@@ -1,6 +1,65 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { topics } from '../topics/index'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+
+const cleanResponse = (text) => {
+  if (!text) return ''
+  
+  let cleaned = text
+    // Remove common noise and OCR artifacts
+    .replace(/\d{5,}/g, '') // Remove random long numbers like 23456789
+    .replace(/\d+ chapter \d+/gi, '')
+    .replace(/exercises \d+ [–-] \d+/gi, '')
+    .replace(/section \d+\.\d+/gi, '')
+    .replace(/big ideas math com/gi, '')
+    .replace(/multi - language glossary at big ideas math/gi, '')
+    .replace(/lesson tutorials/gi, '')
+    .replace(/check it out/gi, '')
+    
+    // Clean math delimiters
+    .replace(/\\ \\ \(/g, ' $ ')
+    .replace(/\\ \\ \)/g, ' $ ')
+    .replace(/\\ \\ \[/g, '\n$$\n')
+    .replace(/\\ \\ \]/g, '\n$$\n')
+    .replace(/\\ u 0026/g, '&')
+    .replace(/\\ \\ /g, '\\')
+    .replace(/begin { aligned }/g, '\\begin{aligned}')
+    .replace(/end { aligned }/g, '\\end{aligned}')
+    
+  // Split into sections based on keywords
+  const regex = /(\d+ activity|example \d+|key idea|key vocabulary|vocabulary|critical thinking|reasoning|on your own)/gi
+  const parts = cleaned.split(regex)
+  
+  let formatted = ''
+  
+  // Add the introduction part if it exists
+  if (parts[0] && parts[0].trim()) {
+    formatted += parts[0].trim() + '\n\n'
+  }
+  
+  // Process the matched sections
+  for (let i = 1; i < parts.length; i += 2) {
+    const header = parts[i]
+    const content = parts[i+1]
+    if (header && content) {
+      formatted += `### ${header.trim().toUpperCase()}\n${content.trim()}\n\n`
+    }
+  }
+  
+  // Fallback if no sections were found
+  if (formatted === '' && cleaned) {
+    formatted = cleaned
+  }
+  
+  // Final cleanup of extra newlines and spaces
+  return formatted
+    .replace(/\n\n+/g, '\n\n')
+    .replace(/ +/g, ' ')
+    .trim()
+}
 
 const difficultyStyle = {
   Beginner: { bg: 'rgba(0, 224, 198, 0.1)', text: '#00e0c6', border: 'rgba(0, 224, 198, 0.2)' },
@@ -15,6 +74,45 @@ const categoryAccent = {
 }
 
 export default function Home() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResult, setSearchResult] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return
+    setIsLoading(true)
+    setError(null)
+    setSearchResult('')
+    try {
+      const response = await fetch('https://api.langsearch.com/v1/web-search', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_LANGSEARCH_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          freshness: "noLimit",
+          summary: false,
+          count: 5
+        })
+      })
+
+      const result = await response.json()
+      if (result.code === 200 && result.data?.webPages?.value) {
+        setSearchResult(result.data.webPages.value)
+      } else {
+        setError('No results found for this query.')
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     document.title = "GanithSamaaj — Interactive 3D Math Visualizations"
 
@@ -120,6 +218,18 @@ export default function Home() {
             >
               📚 Formula Cheat Sheet
             </Link>
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="px-6 py-3 rounded-full text-sm font-display font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              style={{
+                background: 'rgba(18, 20, 28, 0.8)',
+                color: '#00e0c6',
+                border: '1px solid rgba(0, 224, 198, 0.2)',
+                boxShadow: '0 4px 20px rgba(0, 224, 198, 0.1)',
+              }}
+            >
+              <span>🧠</span> Intelligent Search
+            </button>
           </div>
 
           {/* Feature chips */}
@@ -354,6 +464,111 @@ export default function Home() {
       <div className="py-8 text-center text-xs font-body" style={{ color: '#4a4d5e', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         <p>Developed by <span style={{ color: '#00e0c6', fontWeight: 'bold' }}>Mohammed Nihal</span></p>
       </div>
+
+      {/* Search Modal */}
+      {isSearchOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
+          style={{ background: 'rgba(12, 13, 20, 0.95)' }}
+          onClick={() => setIsSearchOpen(false)}
+        >
+          <div 
+            className="w-full max-w-3xl bg-void-50 border border-void-200 rounded-2xl p-4 md:p-6 shadow-2xl max-h-[90vh] overflow-y-auto anim-fade-up"
+            style={{
+              background: '#12141c',
+              border: '1px solid rgba(255,255,255,0.05)',
+              animationDuration: '0.3s',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h2 className="text-lg md:text-xl font-display font-bold text-ink flex items-center gap-2">
+                <span>🧠</span> Intelligent Search
+              </h2>
+              <button 
+                onClick={() => setIsSearchOpen(false)}
+                className="text-ink-muted hover:text-ink transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Input */}
+            <div className="relative mb-4 md:mb-6">
+              <input 
+                type="text"
+                placeholder="Ask anything about Class 9 Math..."
+                className="w-full bg-void border border-void-200 rounded-xl px-4 py-3 text-ink font-body focus:outline-none focus:border-neon-teal transition-colors text-sm md:text-base"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  borderColor: 'rgba(255,255,255,0.05)',
+                }}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button 
+                onClick={handleSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 md:px-4 py-1 md:py-1.5 rounded-lg bg-neon-teal text-void font-display font-bold text-xs"
+                style={{
+                  background: '#00e0c6',
+                  color: '#08090d',
+                }}
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Results */}
+            <div className="results-area">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <span className="glow-pulse" style={{ color: '#00e0c6' }}>Thinking...</span>
+                </div>
+              ) : error ? (
+                <p className="text-red-500 text-sm font-body">{error}</p>
+              ) : Array.isArray(searchResult) && searchResult.length > 0 ? (
+                <div className="space-y-3 md:space-y-4">
+                  {searchResult.map((res, idx) => (
+                    <div 
+                      key={res.id || idx}
+                      className="p-3 md:p-4 rounded-xl bg-void border border-void-200 hover:border-neon-teal transition-colors anim-fade-up"
+                      style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        borderColor: 'rgba(255,255,255,0.05)',
+                        animationDelay: `${idx * 50}ms`,
+                      }}
+                    >
+                      <a 
+                        href={res.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs md:text-sm font-display font-bold text-neon-teal hover:underline block mb-1 break-words"
+                        style={{ color: '#00e0c6' }}
+                      >
+                        {res.name}
+                      </a>
+                      <span className="text-[10px] md:text-xs text-ink-muted font-body block mb-1 md:mb-2 break-all" style={{ color: '#4a4d5e' }}>
+                        {res.displayUrl}
+                      </span>
+                      {res.snippet && (
+                        <p className="text-[11px] md:text-xs text-ink-muted font-body leading-relaxed break-words" style={{ color: '#7a7d8e' }}>
+                          {res.snippet}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-ink-muted text-sm font-body text-center py-10">
+                  Ask a question to get started. Example: "Explain Area of cone"
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
