@@ -24,9 +24,10 @@ function FloatingText({ text, position, fontSize, color }) {
       let targetY = position[1] + Math.sin(t * speed.current + offset.current) * 0.15
       let targetX = position[0] + Math.cos(t * speed.current + offset.current) * 0.15
 
-      // Parallax effect based on mouse (gentle movement)
-      targetX += x * 0.2
-      targetY += y * 0.2
+      // Stronger parallax effect based on depth (closer objects move more)
+      const depthFactor = (position[2] + 1.5) * 0.4 + 0.2
+      targetX += x * depthFactor
+      targetY += y * depthFactor
 
       // Smooth interpolation (lerp)
       ref.current.position.x = THREE.MathUtils.lerp(ref.current.position.x, targetX, 0.1)
@@ -36,7 +37,9 @@ function FloatingText({ text, position, fontSize, color }) {
       const targetScale = hovered ? 1.5 : 1
       ref.current.scale.setScalar(THREE.MathUtils.lerp(ref.current.scale.x, targetScale, 0.2))
 
-      // Gentle rotation
+      // Rotate towards mouse + gentle floating rotation
+      ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, x * 0.5, 0.1)
+      ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, -y * 0.5, 0.1)
       ref.current.rotation.z = Math.sin(t * 0.3 + offset.current) * 0.1
     }
   })
@@ -338,6 +341,12 @@ export default function Landing() {
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center text-xs font-body" style={{ color: '#4a4d5e' }}>
         <p>Developed by <span style={{ color: '#00e0c6', fontWeight: 'bold' }}>Mohammed Nihal</span></p>
+        <p className="mt-1">
+          Want to build Personalized AI product? Contact us{' '}
+          <a href="mailto:mohd.nihalll03@gmail.com" style={{ color: '#00e0c6' }}>
+            ✉️
+          </a>
+        </p>
       </div>
     </div>
   )

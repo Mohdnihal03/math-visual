@@ -16,7 +16,7 @@ export default function CheatSheet() {
             📚 Formula Cheat Sheet
           </h1>
           <p className="text-[#7a7d8e] mt-1">
-            All your Class 9 formulas with memory tips in one place.
+            All your formulas with memory tips in one place.
           </p>
         </div>
       </div>

@@ -223,6 +223,71 @@ function InfoContent({ topic, computed, onStepChange }) {
           </ul>
         </section>
       )}
+
+      {/* Benefits */}
+      {topic.benefits && topic.benefits.length > 0 && (
+        <section className="px-5 py-5" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <h2
+            className="text-[10px] font-display font-bold uppercase tracking-[0.2em] mb-3"
+            style={{ color: '#10b981' }}
+          >
+            Learning Benefits
+          </h2>
+          <ul className="text-sm leading-relaxed font-body list-disc pl-5" style={{ color: '#7a7d8e' }}>
+            {topic.benefits.map((benefit, i) => (
+              <li key={i} className="mb-2">{benefit}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Use Cases */}
+      {topic.useCases && topic.useCases.length > 0 && (
+        <section className="px-5 py-5" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <h2
+            className="text-[10px] font-display font-bold uppercase tracking-[0.2em] mb-3"
+            style={{ color: '#60a5fa' }}
+          >
+            Who Is This For?
+          </h2>
+          <ul className="text-sm leading-relaxed font-body list-disc pl-5" style={{ color: '#7a7d8e' }}>
+            {topic.useCases.map((useCase, i) => (
+              <li key={i} className="mb-2">{useCase}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {topic.faq && topic.faq.length > 0 && (
+        <section className="px-5 py-5" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <h2
+            className="text-[10px] font-display font-bold uppercase tracking-[0.2em] mb-3"
+            style={{ color: '#a78bfa' }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <div className="flex flex-col gap-3">
+            {topic.faq.map((item, i) => (
+              <div
+                key={i}
+                className="rounded-xl p-4"
+                style={{
+                  background: 'rgba(18, 20, 28, 0.6)',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                }}
+              >
+                <p className="text-xs font-body font-bold mb-1" style={{ color: '#00e0c6' }}>
+                  Q: {item.q}
+                </p>
+                <p className="text-sm font-body" style={{ color: '#7a7d8e' }}>
+                  A: {item.a}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   )
 }
@@ -359,7 +424,8 @@ export default function TopicPage() {
 
   useEffect(() => {
     if (topic) {
-      document.title = `${topic.title} | Interactive 3D Math`
+      // Use meta title if available, otherwise fallback
+      document.title = topic.meta?.title || `${topic.title} | Interactive 3D Math`
 
       let metaDesc = document.querySelector('meta[name="description"]')
       if (!metaDesc) {
@@ -367,7 +433,8 @@ export default function TopicPage() {
         metaDesc.name = "description"
         document.head.appendChild(metaDesc)
       }
-      metaDesc.content = topic.description
+      // Use meta description if available, otherwise fallback
+      metaDesc.content = topic.meta?.description || topic.description
 
       // Structured Data (JSON-LD)
       const structuredData = {
@@ -377,6 +444,18 @@ export default function TopicPage() {
         "description": topic.description,
         "educationalUse": "learning",
         "learningResourceType": "Visual Resource"
+      }
+
+      // Add FAQ Schema if exists
+      if (topic.faq) {
+        structuredData.mainEntity = topic.faq.map(item => ({
+          "@type": "Question",
+          "name": item.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.a
+          }
+        }))
       }
 
       let script = document.getElementById('json-ld-topic')

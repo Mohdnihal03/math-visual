@@ -2,17 +2,122 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ganithsociety.com/</loc>
-    <lastmod>2026-05-14</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://ganithsociety.com/home</loc>
-    <lastmod>2026-05-14</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ganithsociety.com/cheat-sheet</loc>
-    <lastmod>2026-05-14</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/pythagorean</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/trigonometry</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/quadratic</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/sphere</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/cylinder</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/linear</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/triangle</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/derivatives</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/fibonacci</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/integration</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/coordinate-geometry</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/cone</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/quadrilaterals</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/circles</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/number-systems</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/statistics</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/rectangle</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/cuboid</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/herons-formula</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/probability</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ganithsociety.com/topic/lines-and-angles</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
   </url>
 </urlset>
